@@ -92,19 +92,19 @@ def create_project(task, project_path, max_attempts=5):
 
 
 # ---------------- RUN EXAMPLE ----------------
-# if __name__ == "__main__":
-#     parser = argparse.ArgumentParser()
-#     parser.add_argument("task", help="The coding task for the AI")
-#     parser.add_argument("project_path", help="Where to save the project")
-#     args = parser.parse_args()
-
-#     create_project(args.task, args.project_path)
-
----------------- RUN EXAMPLE ----------------
 if __name__ == "__main__":
-    create_project(
-        "Make a Python scientific calculator app. Include 10 different operations. Exclude add, subtract, multiply, divide", #task
-        "./my_projects/scientific_calculator_app" #project_path
-    )
+    parser = argparse.ArgumentParser()
+    parser.add_argument("task", help="The coding task for the AI")
+    parser.add_argument("project_path", help="Where to save the project")
+    args = parser.parse_args()
+
+    create_project(args.task, args.project_path)
+
+# ---------------- RUN EXAMPLE ----------------
+# if __name__ == "__main__":
+#     create_project(
+#         "Make a Python scientific calculator app. Include 10 different operations. Exclude add, subtract, multiply, divide", #task
+#         "./my_projects/scientific_calculator_app" #project_path
+#     )
 
 
