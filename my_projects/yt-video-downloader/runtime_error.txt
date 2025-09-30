@@ -1,0 +1,56 @@
+Why It Failed
+
+Python Version Issue
+
+Deprecated Feature: Support for Python version 3.8 has been deprecated.
+
+
+→ yt-dlp still runs on Python 3.8, but it’s warning you that future support will be dropped. Upgrading to Python 3.9+ will avoid surprises.
+
+ffmpeg Missing
+
+ERROR: You have requested merging of multiple formats but ffmpeg is not installed.
+
+
+→ yt-dlp downloads audio & video streams separately for some formats, then needs ffmpeg to merge them. Without ffmpeg, it aborts.
+
+nsig Extraction Failed
+
+WARNING: nsig extraction failed: Some formats may be missing
+
+
+→ This happens because YouTube keeps changing its player JS. Updating yt-dlp usually fixes it. You’re on 2024.10.22, so it’s already recent — might just be YouTube changing daily.
+
+Mistral Validation Error
+
+⚠️ Validation failed: API error occurred: Status 429 (capacity exceeded)
+
+
+→ That’s just your validation LLM hitting rate limits or server load. The code itself was fine — the validator just couldn’t recheck it.
+
+🔧 Fixes You Need
+
+Install ffmpeg
+
+On Windows:
+
+choco install ffmpeg
+
+
+or download from ffmpeg.org
+ and add it to PATH.
+
+On Linux/macOS:
+
+sudo apt install ffmpeg   # Ubuntu/Debian
+brew install ffmpeg       # macOS
+
+
+Upgrade Python (Optional but Recommended)
+
+Move to Python 3.10 or 3.11 for best compatibility with new libs.
+
+Retry after Installing ffmpeg
+Once ffmpeg is available, your app should download & merge videos fine.
+
+👉 So the core agent logic worked. The failure wasn’t on your bot’s side, but rather system requirements (ffmpeg + newer Python).
