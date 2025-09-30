@@ -1,5 +1,0 @@
-py app.py "Make a Python scientific calculator app. Include 10 different operations. Exclude add, subtract, multiply, divide" "./my_projects/scientific_calculator_app"
-
-
-
-py app.py "you have made this scientific calculator here. I want you to made it more useful.. .include add, subtract, multiply, divide and add one of unique feature which can be handy  " "./my_projects/scientific_calculator_app"

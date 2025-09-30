@@ -36,23 +36,49 @@ def ask_model(task, error=None):
         return None
 
 
+# def save_code(path, code):
+#     with open(path, "w", encoding="utf-8") as f:
+#         f.write(code)
 def save_code(path, code):
+    # Clean out accidental markdown fences like ```python ... ```
+    if code.strip().startswith("```"):
+        code = "\n".join(
+            line for line in code.splitlines()
+            if not line.strip().startswith("```")
+        )
     with open(path, "w", encoding="utf-8") as f:
-        f.write(code)
+        f.write(code.strip() + "\n")
 
 
-def run_code(path): #added functionality to install packages if missing
-    try:
-        result = subprocess.run(["python", path], capture_output=True, text=True)
-        return result.stdout.strip(), result.stderr.strip()
-    except ModuleNotFoundError as e:
-        missing_pkg = str(e).split("'")[1]  # extract package name
+# def run_code(path): #added functionality to install packages if missing
+#     try:
+#         result = subprocess.run(["python", path], capture_output=True, text=True)
+#         return result.stdout.strip(), result.stderr.strip()
+#     except ModuleNotFoundError as e:
+#         missing_pkg = str(e).split("'")[1]  # extract package name
+#         print(f"📦 Missing package: {missing_pkg}. Installing...")
+#         subprocess.run(["pip", "install", missing_pkg])
+#         # Retry once after installing
+#         result = subprocess.run(["python", path], capture_output=True, text=True)
+#         return result.stdout.strip(), result.stderr.strip()
+
+
+
+
+#added functionality to install packages if missing. subprocess.run() never raises ModuleNotFoundError.Instead, it just returns the error as stderr text.That’s why except ModuleNotFoundError never runs.So code never reached the “📦 Missing package: … Installing...” part.
+def run_code(path):
+    result = subprocess.run([sys.executable, path], capture_output=True, text=True) #sys.executable points to the exact interpreter running.So both installation and code execution use the same environment.
+    out, err = result.stdout.strip(), result.stderr.strip()
+
+    if "ModuleNotFoundError" in err:
+        missing_pkg = err.split("'")[1]
         print(f"📦 Missing package: {missing_pkg}. Installing...")
-        subprocess.run(["pip", "install", missing_pkg])
-        # Retry once after installing
-        result = subprocess.run(["python", path], capture_output=True, text=True)
+        subprocess.run([sys.executable, "-m", "pip", "install", missing_pkg])
+        # Retry with the same interpreter
+        result = subprocess.run([sys.executable, path], capture_output=True, text=True)
         return result.stdout.strip(), result.stderr.strip()
 
+    return out, err
 
 
 def validate_code(task, code):
