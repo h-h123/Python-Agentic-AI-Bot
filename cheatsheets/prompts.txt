@@ -10,3 +10,8 @@ py agentic_app.py "Build a Tkinter-based Music Player. Features like  Load a fol
 
 
 py agentic_app.py "Build a Tkinter-based app that downloads YouTube videos.Input: URL text field.Button: Download.Show real-time progress bar and percentage of download completed.Use pytube or yt-dlp for downloading." "./my_projects/yt-video-downloader"
+
+py new_agentic_app.py "Build a Streamlit-based stock trading simulator.Fetch stock prices using Yahoo Finance (yfinance).Show candlestick charts with Plotly.Let user "buy" and "sell" virtual stocks with a balance of $10,000.Track portfolio performance in real-time.Requirements:Files: main.py, utils/stocks.py, utils/trading.py, utils/portfolio.py and requirements.txt included.Simple UI with tabs: Dashboard, Buy/Sell, Portfolio." "./my_projects/Stock-trading-app-streamlit"
+
+
+
