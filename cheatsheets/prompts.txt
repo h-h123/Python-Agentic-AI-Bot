@@ -1,0 +1,12 @@
+py app.py "Make a Python scientific calculator app. Include 10 different operations. Exclude add, subtract, multiply, divide" "./my_projects/scientific_calculator_app"
+
+py app.py "you have made this scientific calculator here. I want you to made it more useful.. .include add, subtract, multiply, divide and add one of unique feature which can be handy  " "./my_projects/scientific_calculator_app"
+
+py app.py "you have made this scientific calculator here. I want you to made it more useful.. .include add, subtract, mul add one of unique feature which can be handy  " "./my_projects/scientific_calculator_app"
+
+py agentic_app.py "Create a command-line game of Rock-Paper-Scissors where: User chooses Rock/Paper/Scissors. Computer picks randomly. Show who wins." "./my_projects/ Rock-Paper-Scissors_CLI"
+
+py agentic_app.py "Build a Tkinter-based Music Player. Features like  Load a folder of .mp3 files. Play, Pause, Stop, Next, Previous buttons. Show currently playing track name.Volume control slider. Use pygame.mixer for audio playback. GUI should look neat (basic layout)." "./my_projects/music-player"
+
+
+py agentic_app.py "Build a Tkinter-based app that downloads YouTube videos.Input: URL text field.Button: Download.Show real-time progress bar and percentage of download completed.Use pytube or yt-dlp for downloading." "./my_projects/yt-video-downloader"
