@@ -1,0 +1,4 @@
+source "myenv/Scripts/activate"
+
+git reset
+
