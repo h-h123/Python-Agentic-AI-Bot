@@ -27,13 +27,22 @@ def ask_model(task, error=None):
     {error_text}
 
     Write a complete working Python project.
-    - You can output multiple files.
-    - Either output as a JSON object: keys are relative paths, values are code,
-      OR as plain text blocks using:
-      === filename ===
-      <code here>
-    - Only output code; no explanations or markdown fences.
+
+    Rules:
+    - Output must be EITHER:
+        (a) JSON object → {{ "main.py": "code here", "utils/helper.py": "code here" }}
+        OR
+        (b) Plain text blocks → use EXACT format:
+
+        === filename.py ===
+        <code here>
+
+    - Filenames MUST end with .py (or .txt/.md for docs).
+    - Do NOT output ASCII art, explanations, or markdown fences (```).
+    - Do NOT leave any file empty. Every file must contain valid, runnable code.
     """
+
+
     try:
         response = client.chat.complete(
             model=model,
@@ -50,9 +59,21 @@ def parse_files_from_text(text):
     pattern = re.compile(r"===\s*(.+?)\s*===\s*\n([\s\S]*?)(?=(?:\n===|$))", re.MULTILINE)
     for match in pattern.findall(text):
         filename, code = match
+        filename = filename.strip()
+
+        # Ignore nonsense "filenames" like ASCII art or empty
+        if not filename.endswith(".py"):
+            continue
+
+        # Remove accidental markdown fences
         code_lines = [line for line in code.splitlines() if not line.strip().startswith("```")]
-        files[filename.strip()] = "\n".join(code_lines).strip() + "\n"
+        code = "\n".join(code_lines).strip()
+
+        if code:  # Only save non-empty files
+            files[filename] = code + "\n"
     return files
+
+
 
 def save_project(project_path, files_dict):
     """Save multiple files from a dict {relative_path: code}"""
@@ -75,19 +96,27 @@ def run_code(path):
         out, err = result.stdout.strip(), result.stderr.strip()
     return out, err
 
-def validate_code(task, main_code):
-    """Ask the model to validate the main entry file"""
+def validate_code(task, project_path):
+    """Ask the model to validate ALL generated Python files"""
+    all_code = ""
+    for root, _, files in os.walk(project_path):
+        for f in files:
+            if f.endswith(".py"):
+                with open(os.path.join(root, f), "r", encoding="utf-8") as file:
+                    all_code += f"\n\n# File: {f}\n" + file.read()
+
     prompt = f"""
     You are a strict code reviewer.
     Task: {task}
 
-    Here is the generated code of the main entry file:
-    {main_code}
+    Here is the generated project code (all files):
+    {all_code}
 
-    Does this code fully satisfy the task requirements?
+    Does this project fully satisfy the task requirements?
     - Answer only 'YES' or 'NO' in the first line.
     - If NO, provide a one-line reason after that.
     """
+
     try:
         response = client.chat.complete(
             model=model,
@@ -114,11 +143,14 @@ def detect_entry_file(project_path):
     # Fallback: main.py
     return os.path.join(project_path, "main.py")
 
+
+#core project creation function
 def create_project(task, project_path, max_attempts=5, auto_run=False):
     os.makedirs(project_path, exist_ok=True)
     error = None
     success = False
     files_dict = {}
+    entry_file = None
 
     for attempt in range(1, max_attempts + 1):
         code_str = ask_model(task, error)
@@ -137,7 +169,7 @@ def create_project(task, project_path, max_attempts=5, auto_run=False):
 
         if not files_dict:
             print(f"❌ Attempt {attempt}: No files parsed. Retrying...")
-            error = "No files parsed"
+            error = "Generated empty files"
             continue
 
         save_project(project_path, files_dict)

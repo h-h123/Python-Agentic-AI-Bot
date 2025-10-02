@@ -13,5 +13,6 @@ py agentic_app.py "Build a Tkinter-based app that downloads YouTube videos.Input
 
 py new_agentic_app.py "Build a Streamlit-based stock trading simulator.Fetch stock prices using Yahoo Finance (yfinance).Show candlestick charts with Plotly.Let user "buy" and "sell" virtual stocks with a balance of $10,000.Track portfolio performance in real-time.Requirements:Files: main.py, utils/stocks.py, utils/trading.py, utils/portfolio.py and requirements.txt included.Simple UI with tabs: Dashboard, Buy/Sell, Portfolio." "./my_projects/Stock-trading-app-streamlit"
 
+py new_agentic_app.py "Build a Streamlit-based stock trading simulator.Fetch stock prices using Yahoo Finance (yfinance).Show candlestick charts with Plotly.Let user "buy" and "sell" virtual stocks with a balance of $10,000.Track portfolio performance in real-time.Requirements:Files: main.py, utils/stocks.py, utils/trading.py, utils/portfolio.py and requirements.txt included.Simple UI with tabs: Dashboard, Buy/Sell, Portfolio." "./my_projects/Stock-trading-app-streamlit2"
 
-
+py new_agentic_app.py "Create Python code application that simulates a railway reservation system with seat booking and cancellation." "./my_projects/rail-reservation-app"
