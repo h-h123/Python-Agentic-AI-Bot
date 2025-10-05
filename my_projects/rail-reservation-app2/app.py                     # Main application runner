@@ -1,0 +1,430 @@
+```python
+import sqlite3
+from datetime import datetime
+from typing import List, Dict, Optional, Tuple
+import logging
+from config import DATABASE_NAME, LOG_LEVEL, LOG_FORMAT
+
+# Configure logging
+logging.basicConfig(level=LOG_LEVEL, format=LOG_FORMAT)
+logger = logging.getLogger(__name__)
+
+class RailwayReservationSystem:
+    def __init__(self):
+        self.conn = sqlite3.connect(DATABASE_NAME)
+        self._initialize_database()
+
+    def _initialize_database(self):
+        """Initialize the database with required tables."""
+        try:
+            cursor = self.conn.cursor()
+
+            # Create trains table
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS trains (
+                    train_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    train_name TEXT NOT NULL,
+                    source TEXT NOT NULL,
+                    destination TEXT NOT NULL,
+                    total_seats INTEGER NOT NULL,
+                    available_seats INTEGER NOT NULL,
+                    departure_time TEXT NOT NULL,
+                    arrival_time TEXT NOT NULL
+                )
+            ''')
+
+            # Create passengers table
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS passengers (
+                    passenger_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT NOT NULL,
+                    age INTEGER NOT NULL,
+                    gender TEXT NOT NULL,
+                    contact_number TEXT NOT NULL
+                )
+            ''')
+
+            # Create bookings table
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS bookings (
+                    booking_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    train_id INTEGER NOT NULL,
+                    passenger_id INTEGER NOT NULL,
+                    seat_number INTEGER NOT NULL,
+                    booking_date TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    FOREIGN KEY (train_id) REFERENCES trains (train_id),
+                    FOREIGN KEY (passenger_id) REFERENCES passengers (passenger_id)
+                )
+            ''')
+
+            self.conn.commit()
+            logger.info("Database initialized successfully")
+
+            # Add sample data if tables are empty
+            cursor.execute("SELECT COUNT(*) FROM trains")
+            if cursor.fetchone()[0] == 0:
+                self._add_sample_data()
+
+        except sqlite3.Error as e:
+            logger.error(f"Database initialization error: {e}")
+            raise
+
+    def _add_sample_data(self):
+        """Add sample data to the database for testing."""
+        try:
+            cursor = self.conn.cursor()
+
+            # Add sample trains
+            trains = [
+                ("Express 101", "New York", "Chicago", 100, 100, "08:00", "14:00"),
+                ("Express 202", "Chicago", "Los Angeles", 150, 150, "10:00", "22:00"),
+                ("Local 303", "Boston", "Washington", 80, 80, "06:30", "12:30")
+            ]
+
+            cursor.executemany(
+                "INSERT INTO trains (train_name, source, destination, total_seats, available_seats, departure_time, arrival_time) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                trains
+            )
+
+            # Add sample passengers
+            passengers = [
+                ("John Doe", 30, "Male", "1234567890"),
+                ("Jane Smith", 25, "Female", "9876543210"),
+                ("Bob Johnson", 45, "Male", "5551234567")
+            ]
+
+            cursor.executemany(
+                "INSERT INTO passengers (name, age, gender, contact_number) VALUES (?, ?, ?, ?)",
+                passengers
+            )
+
+            self.conn.commit()
+            logger.info("Sample data added successfully")
+
+        except sqlite3.Error as e:
+            logger.error(f"Error adding sample data: {e}")
+            self.conn.rollback()
+            raise
+
+    def add_train(self, train_name: str, source: str, destination: str, total_seats: int,
+                  departure_time: str, arrival_time: str) -> bool:
+        """Add a new train to the system."""
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute(
+                "INSERT INTO trains (train_name, source, destination, total_seats, available_seats, departure_time, arrival_time) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (train_name, source, destination, total_seats, total_seats, departure_time, arrival_time)
+            )
+            self.conn.commit()
+            logger.info(f"Train {train_name} added successfully")
+            return True
+        except sqlite3.Error as e:
+            logger.error(f"Error adding train: {e}")
+            self.conn.rollback()
+            return False
+
+    def search_trains(self, source: str, destination: str) -> List[Dict]:
+        """Search for trains between source and destination."""
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute(
+                "SELECT train_id, train_name, source, destination, available_seats, departure_time, arrival_time FROM trains WHERE source=? AND destination=?",
+                (source, destination)
+            )
+            trains = []
+            for row in cursor.fetchall():
+                trains.append({
+                    "train_id": row[0],
+                    "train_name": row[1],
+                    "source": row[2],
+                    "destination": row[3],
+                    "available_seats": row[4],
+                    "departure_time": row[5],
+                    "arrival_time": row[6]
+                })
+            return trains
+        except sqlite3.Error as e:
+            logger.error(f"Error searching trains: {e}")
+            return []
+
+    def book_seat(self, train_id: int, passenger_name: str, age: int, gender: str,
+                  contact_number: str) -> Tuple[bool, Optional[str]]:
+        """Book a seat on a train."""
+        try:
+            cursor = self.conn.cursor()
+
+            # Check if seat is available
+            cursor.execute(
+                "SELECT available_seats FROM trains WHERE train_id=?",
+                (train_id,)
+            )
+            result = cursor.fetchone()
+            if not result or result[0] <= 0:
+                return False, "No seats available on this train"
+
+            # Add passenger if not exists
+            cursor.execute(
+                "SELECT passenger_id FROM passengers WHERE name=? AND age=? AND gender=? AND contact_number=?",
+                (passenger_name, age, gender, contact_number)
+            )
+            passenger = cursor.fetchone()
+
+            if not passenger:
+                cursor.execute(
+                    "INSERT INTO passengers (name, age, gender, contact_number) VALUES (?, ?, ?, ?)",
+                    (passenger_name, age, gender, contact_number)
+                )
+                passenger_id = cursor.lastrowid
+            else:
+                passenger_id = passenger[0]
+
+            # Find next available seat number
+            cursor.execute(
+                "SELECT MAX(seat_number) FROM bookings WHERE train_id=?",
+                (train_id,)
+            )
+            max_seat = cursor.fetchone()[0] or 0
+            seat_number = max_seat + 1
+
+            # Create booking
+            booking_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            cursor.execute(
+                "INSERT INTO bookings (train_id, passenger_id, seat_number, booking_date, status) VALUES (?, ?, ?, ?, ?)",
+                (train_id, passenger_id, seat_number, booking_date, "Confirmed")
+            )
+
+            # Update available seats
+            cursor.execute(
+                "UPDATE trains SET available_seats = available_seats - 1 WHERE train_id=?",
+                (train_id,)
+            )
+
+            self.conn.commit()
+            logger.info(f"Seat {seat_number} booked successfully for passenger {passenger_name}")
+            return True, f"Booking confirmed. Seat number: {seat_number}"
+
+        except sqlite3.Error as e:
+            logger.error(f"Error booking seat: {e}")
+            self.conn.rollback()
+            return False, "Booking failed due to database error"
+
+    def cancel_booking(self, booking_id: int) -> Tuple[bool, Optional[str]]:
+        """Cancel a booking and free up the seat."""
+        try:
+            cursor = self.conn.cursor()
+
+            # Get booking details
+            cursor.execute(
+                "SELECT train_id, seat_number FROM bookings WHERE booking_id=? AND status='Confirmed'",
+                (booking_id,)
+            )
+            booking = cursor.fetchone()
+
+            if not booking:
+                return False, "Booking not found or already cancelled"
+
+            train_id, seat_number = booking
+
+            # Update booking status
+            cursor.execute(
+                "UPDATE bookings SET status='Cancelled' WHERE booking_id=?",
+                (booking_id,)
+            )
+
+            # Update available seats
+            cursor.execute(
+                "UPDATE trains SET available_seats = available_seats + 1 WHERE train_id=?",
+                (train_id,)
+            )
+
+            self.conn.commit()
+            logger.info(f"Booking {booking_id} cancelled successfully")
+            return True, f"Booking cancelled. Seat number {seat_number} is now available"
+
+        except sqlite3.Error as e:
+            logger.error(f"Error cancelling booking: {e}")
+            self.conn.rollback()
+            return False, "Cancellation failed due to database error"
+
+    def get_booking_details(self, booking_id: int) -> Optional[Dict]:
+        """Get details of a specific booking."""
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute('''
+                SELECT b.booking_id, t.train_name, t.source, t.destination,
+                       p.name, p.age, p.gender, b.seat_number,
+                       b.booking_date, b.status, t.departure_time, t.arrival_time
+                FROM bookings b
+                JOIN trains t ON b.train_id = t.train_id
+                JOIN passengers p ON b.passenger_id = p.passenger_id
+                WHERE b.booking_id=?
+            ''', (booking_id,))
+
+            row = cursor.fetchone()
+            if not row:
+                return None
+
+            return {
+                "booking_id": row[0],
+                "train_name": row[1],
+                "source": row[2],
+                "destination": row[3],
+                "passenger_name": row[4],
+                "age": row[5],
+                "gender": row[6],
+                "seat_number": row[7],
+                "booking_date": row[8],
+                "status": row[9],
+                "departure_time": row[10],
+                "arrival_time": row[11]
+            }
+        except sqlite3.Error as e:
+            logger.error(f"Error fetching booking details: {e}")
+            return None
+
+    def get_passenger_bookings(self, contact_number: str) -> List[Dict]:
+        """Get all bookings for a passenger by contact number."""
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute('''
+                SELECT b.booking_id, t.train_name, t.source, t.destination,
+                       b.seat_number, b.booking_date, b.status,
+                       t.departure_time, t.arrival_time
+                FROM bookings b
+                JOIN trains t ON b.train_id = t.train_id
+                JOIN passengers p ON b.passenger_id = p.passenger_id
+                WHERE p.contact_number=? AND b.status='Confirmed'
+                ORDER BY b.booking_date DESC
+            ''', (contact_number,))
+
+            bookings = []
+            for row in cursor.fetchall():
+                bookings.append({
+                    "booking_id": row[0],
+                    "train_name": row[1],
+                    "source": row[2],
+                    "destination": row[3],
+                    "seat_number": row[4],
+                    "booking_date": row[5],
+                    "status": row[6],
+                    "departure_time": row[7],
+                    "arrival_time": row[8]
+                })
+            return bookings
+        except sqlite3.Error as e:
+            logger.error(f"Error fetching passenger bookings: {e}")
+            return []
+
+    def close(self):
+        """Close the database connection."""
+        self.conn.close()
+        logger.info("Database connection closed")
+
+def display_menu():
+    """Display the main menu options."""
+    print("\nRailway Reservation System")
+    print("1. Search Trains")
+    print("2. Book a Seat")
+    print("3. Cancel Booking")
+    print("4. View Booking Details")
+    print("5. View My Bookings")
+    print("6. Exit")
+
+def main():
+    system = RailwayReservationSystem()
+
+    try:
+        while True:
+            display_menu()
+            choice = input("Enter your choice (1-6): ")
+
+            if choice == "1":
+                source = input("Enter source station: ")
+                destination = input("Enter destination station: ")
+                trains = system.search_trains(source, destination)
+
+                if not trains:
+                    print("No trains found for the given route.")
+                else:
+                    print("\nAvailable Trains:")
+                    print("{:<5} {:<15} {:<10} {:<15} {:<15} {:<12} {:<12}".format(
+                        "ID", "Train Name", "Source", "Destination", "Available", "Departure", "Arrival"))
+                    for train in trains:
+                        print("{:<5} {:<15} {:<10} {:<15} {:<15} {:<12} {:<12}".format(
+                            train["train_id"], train["train_name"], train["source"],
+                            train["destination"], train["available_seats"],
+                            train["departure_time"], train["arrival_time"]))
+
+            elif choice == "2":
+                try:
+                    train_id = int(input("Enter train ID: "))
+                    name = input("Enter passenger name: ")
+                    age = int(input("Enter passenger age: "))
+                    gender = input("Enter passenger gender: ")
+                    contact = input("Enter contact number: ")
+
+                    success, message = system.book_seat(train_id, name, age, gender, contact)
+                    print(message)
+                except ValueError:
+                    print("Invalid input. Please enter valid numbers for train ID and age.")
+
+            elif choice == "3":
+                try:
+                    booking_id = int(input("Enter booking ID to cancel: "))
+                    success, message = system.cancel_booking(booking_id)
+                    print(message)
+                except ValueError:
+                    print("Invalid input. Please enter a valid booking ID.")
+
+            elif choice == "4":
+                try:
+                    booking_id = int(input("Enter booking ID: "))
+                    booking = system.get_booking_details(booking_id)
+
+                    if booking:
+                        print("\nBooking Details:")
+                        print(f"Booking ID: {booking['booking_id']}")
+                        print(f"Train: {booking['train_name']} ({booking['source']} to {booking['destination']})")
+                        print(f"Passenger: {booking['passenger_name']} (Age: {booking['age']}, Gender: {booking['gender']})")
+                        print(f"Seat Number: {booking['seat_number']}")
+                        print(f"Departure: {booking['departure_time']} | Arrival: {booking['arrival_time']}")
+                        print(f"Booking Date: {booking['booking_date']}")
+                        print(f"Status: {booking['status']}")
+                    else:
+                        print("Booking not found.")
+                except ValueError:
+                    print("Invalid input. Please enter a valid booking ID.")
+
+            elif choice == "5":
+                contact = input("Enter your contact number: ")
+                bookings = system.get_passenger_bookings(contact)
+
+                if not bookings:
+                    print("No bookings found for this contact number.")
+                else:
+                    print("\nYour Bookings:")
+                    print("{:<12} {:<15} {:<10} {:<15} {:<10} {:<12} {:<12} {:<15}".format(
+                        "Booking ID", "Train", "Source", "Destination", "Seat", "Departure", "Arrival", "Booking Date"))
+                    for booking in bookings:
+                        print("{:<12} {:<15} {:<10} {:<15} {:<10} {:<12} {:<12} {:<15}".format(
+                            booking["booking_id"], booking["train_name"], booking["source"],
+                            booking["destination"], booking["seat_number"],
+                            booking["departure_time"], booking["arrival_time"],
+                            booking["booking_date"]))
+
+            elif choice == "6":
+                print("Thank you for using the Railway Reservation System. Goodbye!")
+                break
+
+            else:
+                print("Invalid choice. Please enter a number between 1 and 6.")
+
+    except Exception as e:
+        logger.error(f"Application error: {e}")
+    finally:
+        system.close()
+
+if __name__ == "__main__":
+    main()
+```

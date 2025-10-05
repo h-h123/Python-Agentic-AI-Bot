@@ -1,0 +1,39 @@
+[DATABASE]
+host = localhost
+port = 5432
+database = railway_reservation
+user = postgres
+password = admin123
+
+[LOGGING]
+level = INFO
+file = railway_reservation.log
+format = %(asctime)s - %(name)s - %(levelname)s - %(message)s
+
+[SEATS]
+total_coaches = 10
+seats_per_coach = 72
+window_seats_percentage = 0.3
+aisle_seats_percentage = 0.4
+
+[PRICING]
+base_fare = 500
+window_seat_premium = 1.2
+aisle_seat_premium = 1.1
+middle_seat_discount = 0.9
+
+[BOOKING]
+max_bookings_per_user = 5
+booking_expiry_hours = 24
+payment_timeout_minutes = 15
+
+[USER]
+default_role = passenger
+admin_username = admin
+admin_password = SecureAdmin@123
+
+[SYSTEM]
+app_name = Railway Reservation System
+version = 1.0
+debug_mode = False
+max_connection_pool = 10

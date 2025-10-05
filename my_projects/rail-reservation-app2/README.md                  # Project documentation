@@ -1,0 +1,72 @@
+# Railway Reservation System
+
+## Overview
+This is a Python-based railway reservation system that allows users to:
+- Book seats on trains
+- Cancel existing bookings
+- View available seats
+- Check booking status
+
+## Features
+- **Seat Booking**: Reserve seats on available trains
+- **Cancellation**: Cancel existing bookings with confirmation
+- **Availability Check**: View real-time seat availability
+- **User Authentication**: Secure login system
+- **Admin Panel**: Manage trains and routes (admin only)
+
+## System Requirements
+- Python 3.8+
+- SQLite (included with Python)
+- Packages listed in `requirements.txt`
+
+## Installation
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Run the application:
+   ```bash
+   python main.py
+   ```
+
+## Configuration
+Edit `config.py` to modify:
+- Database settings
+- Logging configuration
+- Application parameters
+
+## Usage
+1. Register a new account or login
+2. Search for available trains
+3. Select seats and confirm booking
+4. View or cancel bookings in your account
+
+## Database Schema
+The system uses SQLite with these main tables:
+- `users`: Stores user credentials and details
+- `trains`: Contains train information and schedules
+- `seats`: Tracks seat availability
+- `bookings`: Records all reservations
+
+## API Endpoints (if implemented)
+- `/api/trains` - List available trains
+- `/api/book` - Create new booking
+- `/api/cancel` - Cancel existing booking
+
+## Security
+- Password hashing for user accounts
+- Input validation for all operations
+- Admin privileges protected
+
+## Future Enhancements
+- Payment gateway integration
+- Mobile app version
+- Real-time train tracking
+- Waitlist functionality
+
+## License
+MIT License - see LICENSE file for details
+
+## Support
+For issues or feature requests, please open an issue in the repository.

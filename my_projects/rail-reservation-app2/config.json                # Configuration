@@ -1,0 +1,146 @@
+{
+    "database": {
+        "name": "railway_reservation.db",
+        "tables": {
+            "users": {
+                "columns": [
+                    {"name": "user_id", "type": "INTEGER PRIMARY KEY AUTOINCREMENT"},
+                    {"name": "username", "type": "TEXT UNIQUE NOT NULL"},
+                    {"name": "password", "type": "TEXT NOT NULL"},
+                    {"name": "email", "type": "TEXT UNIQUE NOT NULL"},
+                    {"name": "phone", "type": "TEXT"},
+                    {"name": "created_at", "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"}
+                ]
+            },
+            "trains": {
+                "columns": [
+                    {"name": "train_id", "type": "INTEGER PRIMARY KEY AUTOINCREMENT"},
+                    {"name": "train_number", "type": "TEXT UNIQUE NOT NULL"},
+                    {"name": "train_name", "type": "TEXT NOT NULL"},
+                    {"name": "source", "type": "TEXT NOT NULL"},
+                    {"name": "destination", "type": "TEXT NOT NULL"},
+                    {"name": "departure_time", "type": "TIME NOT NULL"},
+                    {"name": "arrival_time", "type": "TIME NOT NULL"},
+                    {"name": "total_seats", "type": "INTEGER NOT NULL"},
+                    {"name": "available_seats", "type": "INTEGER NOT NULL"},
+                    {"name": "fare", "type": "REAL NOT NULL"},
+                    {"name": "days_of_operation", "type": "TEXT NOT NULL"}
+                ]
+            },
+            "bookings": {
+                "columns": [
+                    {"name": "booking_id", "type": "INTEGER PRIMARY KEY AUTOINCREMENT"},
+                    {"name": "user_id", "type": "INTEGER NOT NULL"},
+                    {"name": "train_id", "type": "INTEGER NOT NULL"},
+                    {"name": "booking_date", "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"},
+                    {"name": "journey_date", "type": "DATE NOT NULL"},
+                    {"name": "seat_number", "type": "TEXT NOT NULL"},
+                    {"name": "status", "type": "TEXT DEFAULT 'CONFIRMED'"},
+                    {"name": "passenger_name", "type": "TEXT NOT NULL"},
+                    {"name": "passenger_age", "type": "INTEGER NOT NULL"},
+                    {"name": "passenger_gender", "type": "TEXT NOT NULL"},
+                    {"name": "fare", "type": "REAL NOT NULL"},
+                    {"name": "payment_status", "type": "TEXT DEFAULT 'PENDING'"},
+                    "foreign_keys": [
+                        {"column": "user_id", "references": "users(user_id)"},
+                        {"column": "train_id", "references": "trains(train_id)"}
+                    ]
+                ]
+            },
+            "payments": {
+                "columns": [
+                    {"name": "payment_id", "type": "INTEGER PRIMARY KEY AUTOINCREMENT"},
+                    {"name": "booking_id", "type": "INTEGER NOT NULL"},
+                    {"name": "amount", "type": "REAL NOT NULL"},
+                    {"name": "payment_method", "type": "TEXT NOT NULL"},
+                    {"name": "transaction_id", "type": "TEXT UNIQUE"},
+                    {"name": "payment_date", "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"},
+                    {"name": "status", "type": "TEXT DEFAULT 'PENDING'"},
+                    "foreign_keys": [
+                        {"column": "booking_id", "references": "bookings(booking_id)"}
+                    ]
+                ]
+            },
+            "cancellations": {
+                "columns": [
+                    {"name": "cancellation_id", "type": "INTEGER PRIMARY KEY AUTOINCREMENT"},
+                    {"name": "booking_id", "type": "INTEGER NOT NULL"},
+                    {"name": "user_id", "type": "INTEGER NOT NULL"},
+                    {"name": "cancellation_date", "type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"},
+                    {"name": "refund_amount", "type": "REAL"},
+                    {"name": "status", "type": "TEXT DEFAULT 'PENDING'"},
+                    "foreign_keys": [
+                        {"column": "booking_id", "references": "bookings(booking_id)"},
+                        {"column": "user_id", "references": "users(user_id)"}
+                    ]
+                ]
+            }
+        },
+        "sample_data": {
+            "users": [
+                {"username": "admin", "password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW", "email": "admin@railway.com", "phone": "1234567890"},
+                {"username": "user1", "password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW", "email": "user1@example.com", "phone": "9876543210"}
+            ],
+            "trains": [
+                {
+                    "train_number": "12345",
+                    "train_name": "Express 1",
+                    "source": "City A",
+                    "destination": "City B",
+                    "departure_time": "08:00:00",
+                    "arrival_time": "14:00:00",
+                    "total_seats": 100,
+                    "available_seats": 100,
+                    "fare": 50.0,
+                    "days_of_operation": "Mon,Tue,Wed,Thu,Fri"
+                },
+                {
+                    "train_number": "67890",
+                    "train_name": "Express 2",
+                    "source": "City C",
+                    "destination": "City D",
+                    "departure_time": "10:00:00",
+                    "arrival_time": "16:00:00",
+                    "total_seats": 120,
+                    "available_seats": 120,
+                    "fare": 60.0,
+                    "days_of_operation": "Mon,Wed,Fri,Sat"
+                }
+            ]
+        }
+    },
+    "seat_allocation": {
+        "coaches": ["A", "B", "C", "D", "E", "F", "G", "H"],
+        "seats_per_coach": 12,
+        "seat_types": ["Window", "Middle", "Aisle"],
+        "seat_number_format": "{coach}{seat_number}{seat_type}"
+    },
+    "booking_rules": {
+        "max_seats_per_booking": 6,
+        "booking_window_days": 90,
+        "cancellation_fee_percentage": 10,
+        "cancellation_window_hours": 24,
+        "min_booking_hours_before_departure": 2
+    },
+    "payment": {
+        "methods": ["Credit Card", "Debit Card", "Net Banking", "UPI", "Wallet"],
+        "currency": "INR",
+        "tax_percentage": 5
+    },
+    "logging": {
+        "level": "INFO",
+        "file": "railway_reservation.log",
+        "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    },
+    "api": {
+        "port": 5000,
+        "debug": false,
+        "secret_key": "your-secret-key-here",
+        "jwt_expiration_minutes": 30
+    },
+    "security": {
+        "password_salt_rounds": 12,
+        "max_login_attempts": 5,
+        "lockout_minutes": 15
+    }
+}
