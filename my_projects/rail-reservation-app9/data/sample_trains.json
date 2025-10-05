@@ -1,0 +1,136 @@
+{
+  "trains": [
+    {
+      "train_id": "EXP2023",
+      "name": "Express 2023",
+      "total_seats": 100,
+      "booked_seats": [1, 3, 5, 7, 9, 11, 13, 15, 17, 19]
+    },
+    {
+      "train_id": "LOC4567",
+      "name": "Local Commuter",
+      "total_seats": 80,
+      "booked_seats": [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24]
+    },
+    {
+      "train_id": "SUP7890",
+      "name": "Superfast",
+      "total_seats": 120,
+      "booked_seats": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+    },
+    {
+      "train_id": "MET1234",
+      "name": "Metro Express",
+      "total_seats": 60,
+      "booked_seats": [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
+    },
+    {
+      "train_id": "NIT5678",
+      "name": "Night Traveler",
+      "total_seats": 90,
+      "booked_seats": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    }
+  ],
+  "passengers": [
+    {
+      "passenger_id": "PASS001",
+      "name": "John Smith",
+      "booking_ids": ["B1000", "B1001"]
+    },
+    {
+      "passenger_id": "PASS002",
+      "name": "Emily Johnson",
+      "booking_ids": ["B1002", "B1003", "B1004"]
+    },
+    {
+      "passenger_id": "PASS003",
+      "name": "Michael Brown",
+      "booking_ids": ["B1005"]
+    },
+    {
+      "passenger_id": "PASS004",
+      "name": "Sarah Davis",
+      "booking_ids": ["B1006", "B1007"]
+    },
+    {
+      "passenger_id": "PASS005",
+      "name": "Robert Wilson",
+      "booking_ids": ["B1008"]
+    }
+  ],
+  "bookings": [
+    {
+      "booking_id": "B1000",
+      "passenger_id": "PASS001",
+      "train_id": "EXP2023",
+      "seat_number": 1,
+      "booking_time": "2023-11-15T09:30:00",
+      "is_active": true
+    },
+    {
+      "booking_id": "B1001",
+      "passenger_id": "PASS001",
+      "train_id": "LOC4567",
+      "seat_number": 2,
+      "booking_time": "2023-11-16T10:15:00",
+      "is_active": true
+    },
+    {
+      "booking_id": "B1002",
+      "passenger_id": "PASS002",
+      "train_id": "SUP7890",
+      "seat_number": 3,
+      "booking_time": "2023-11-17T11:45:00",
+      "is_active": true
+    },
+    {
+      "booking_id": "B1003",
+      "passenger_id": "PASS002",
+      "train_id": "MET1234",
+      "seat_number": 5,
+      "booking_time": "2023-11-18T12:30:00",
+      "is_active": false
+    },
+    {
+      "booking_id": "B1004",
+      "passenger_id": "PASS002",
+      "train_id": "NIT5678",
+      "seat_number": 1,
+      "booking_time": "2023-11-19T14:00:00",
+      "is_active": true
+    },
+    {
+      "booking_id": "B1005",
+      "passenger_id": "PASS003",
+      "train_id": "EXP2023",
+      "seat_number": 3,
+      "booking_time": "2023-11-20T15:20:00",
+      "is_active": true
+    },
+    {
+      "booking_id": "B1006",
+      "passenger_id": "PASS004",
+      "train_id": "LOC4567",
+      "seat_number": 4,
+      "booking_time": "2023-11-21T16:40:00",
+      "is_active": true
+    },
+    {
+      "booking_id": "B1007",
+      "passenger_id": "PASS004",
+      "train_id": "SUP7890",
+      "seat_number": 2,
+      "booking_time": "2023-11-22T17:55:00",
+      "is_active": true
+    },
+    {
+      "booking_id": "B1008",
+      "passenger_id": "PASS005",
+      "train_id": "MET1234",
+      "seat_number": 10,
+      "booking_time": "2023-11-23T08:10:00",
+      "is_active": true
+    }
+  ],
+  "next_booking_id": 1009
+}

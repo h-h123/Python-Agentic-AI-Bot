@@ -1,0 +1,94 @@
+{
+  "passengers": [
+    {
+      "passenger_id": "P1001",
+      "name": "John Doe",
+      "email": "john.doe@example.com",
+      "phone": "1234567890",
+      "bookings": ["BK-A1B2C3D4", "BK-E5F6G7H8"],
+      "registration_date": "2023-01-15",
+      "loyalty_points": 20
+    },
+    {
+      "passenger_id": "P1002",
+      "name": "Jane Smith",
+      "email": "jane.smith@example.com",
+      "phone": "9876543210",
+      "bookings": ["BK-I9J0K1L2"],
+      "registration_date": "2023-02-20",
+      "loyalty_points": 10
+    },
+    {
+      "passenger_id": "P1003",
+      "name": "Robert Johnson",
+      "email": "robert.j@example.com",
+      "phone": "5551234567",
+      "bookings": ["BK-M3N4O5P6", "BK-Q7R8S9T0", "BK-U1V2W3X4"],
+      "registration_date": "2023-03-10",
+      "loyalty_points": 30
+    },
+    {
+      "passenger_id": "P1004",
+      "name": "Emily Davis",
+      "email": "emily.davis@example.com",
+      "phone": "4445556666",
+      "bookings": [],
+      "registration_date": "2023-04-05",
+      "loyalty_points": 0
+    },
+    {
+      "passenger_id": "P1005",
+      "name": "Michael Brown",
+      "email": "michael.b@example.com",
+      "phone": "7778889999",
+      "bookings": ["BK-Y5Z6A7B8"],
+      "registration_date": "2023-05-12",
+      "loyalty_points": 10
+    },
+    {
+      "passenger_id": "P1006",
+      "name": "Sarah Wilson",
+      "email": null,
+      "phone": "3332221111",
+      "bookings": ["BK-C9D0E1F2", "BK-G3H4I5J6"],
+      "registration_date": "2023-06-18",
+      "loyalty_points": 20
+    },
+    {
+      "passenger_id": "P1007",
+      "name": "David Taylor",
+      "email": "david.taylor@example.com",
+      "phone": null,
+      "bookings": ["BK-K7L8M9N0"],
+      "registration_date": "2023-07-22",
+      "loyalty_points": 10
+    },
+    {
+      "passenger_id": "P1008",
+      "name": "Jessica Anderson",
+      "email": "jessica.a@example.com",
+      "phone": "2223334444",
+      "bookings": [],
+      "registration_date": "2023-08-30",
+      "loyalty_points": 0
+    },
+    {
+      "passenger_id": "P1009",
+      "name": "Thomas Martinez",
+      "email": "thomas.m@example.com",
+      "phone": "6667778888",
+      "bookings": ["BK-O1P2Q3R4", "BK-S5T6U7V8", "BK-W9X0Y1Z2"],
+      "registration_date": "2023-09-14",
+      "loyalty_points": 30
+    },
+    {
+      "passenger_id": "P1010",
+      "name": "Lisa Robinson",
+      "email": "lisa.robinson@example.com",
+      "phone": "1110002222",
+      "bookings": ["BK-A3B4C5D6"],
+      "registration_date": "2023-10-25",
+      "loyalty_points": 10
+    }
+  ]
+}

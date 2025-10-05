@@ -1,0 +1,175 @@
+Here's the content for `data\sample_passengers.json`:
+
+{
+  "passengers": [
+    {
+      "passenger_id": "PASS001",
+      "name": "John Smith",
+      "email": "john.smith@example.com",
+      "phone": "+1234567890",
+      "bookings": [
+        {
+          "booking_id": "B1000",
+          "train_id": "EXP2023",
+          "seat_number": 1,
+          "booking_time": "2023-11-15T09:30:00",
+          "status": "confirmed"
+        },
+        {
+          "booking_id": "B1001",
+          "train_id": "LOC4567",
+          "seat_number": 2,
+          "booking_time": "2023-11-16T10:15:00",
+          "status": "confirmed"
+        }
+      ]
+    },
+    {
+      "passenger_id": "PASS002",
+      "name": "Emily Johnson",
+      "email": "emily.j@example.com",
+      "phone": "+1987654321",
+      "bookings": [
+        {
+          "booking_id": "B1002",
+          "train_id": "SUP7890",
+          "seat_number": 3,
+          "booking_time": "2023-11-17T11:45:00",
+          "status": "confirmed"
+        },
+        {
+          "booking_id": "B1003",
+          "train_id": "MET1234",
+          "seat_number": 5,
+          "booking_time": "2023-11-18T12:30:00",
+          "status": "cancelled"
+        },
+        {
+          "booking_id": "B1004",
+          "train_id": "NIT5678",
+          "seat_number": 1,
+          "booking_time": "2023-11-19T14:00:00",
+          "status": "confirmed"
+        }
+      ]
+    },
+    {
+      "passenger_id": "PASS003",
+      "name": "Michael Brown",
+      "email": "michael.b@example.com",
+      "phone": "+1122334455",
+      "bookings": [
+        {
+          "booking_id": "B1005",
+          "train_id": "EXP2023",
+          "seat_number": 3,
+          "booking_time": "2023-11-20T15:20:00",
+          "status": "confirmed"
+        }
+      ]
+    },
+    {
+      "passenger_id": "PASS004",
+      "name": "Sarah Davis",
+      "email": "sarah.d@example.com",
+      "phone": "+1556677889",
+      "bookings": [
+        {
+          "booking_id": "B1006",
+          "train_id": "LOC4567",
+          "seat_number": 4,
+          "booking_time": "2023-11-21T16:40:00",
+          "status": "confirmed"
+        },
+        {
+          "booking_id": "B1007",
+          "train_id": "SUP7890",
+          "seat_number": 2,
+          "booking_time": "2023-11-22T17:55:00",
+          "status": "confirmed"
+        }
+      ]
+    },
+    {
+      "passenger_id": "PASS005",
+      "name": "Robert Wilson",
+      "email": "robert.w@example.com",
+      "phone": "+1667788990",
+      "bookings": [
+        {
+          "booking_id": "B1008",
+          "train_id": "MET1234",
+          "seat_number": 10,
+          "booking_time": "2023-11-23T08:10:00",
+          "status": "confirmed"
+        }
+      ]
+    },
+    {
+      "passenger_id": "PASS006",
+      "name": "Lisa Thompson",
+      "email": "lisa.t@example.com",
+      "phone": "+1778899001",
+      "bookings": []
+    },
+    {
+      "passenger_id": "PASS007",
+      "name": "David Lee",
+      "email": "david.l@example.com",
+      "phone": "+1889900112",
+      "bookings": [
+        {
+          "booking_id": "B1009",
+          "train_id": "EXP2023",
+          "seat_number": 5,
+          "booking_time": "2023-11-24T09:25:00",
+          "status": "confirmed"
+        }
+      ]
+    },
+    {
+      "passenger_id": "PASS008",
+      "name": "Jennifer Martinez",
+      "email": "jennifer.m@example.com",
+      "phone": "+1990011223",
+      "bookings": [
+        {
+          "booking_id": "B1010",
+          "train_id": "LOC4567",
+          "seat_number": 6,
+          "booking_time": "2023-11-25T10:30:00",
+          "status": "confirmed"
+        },
+        {
+          "booking_id": "B1011",
+          "train_id": "SUP7890",
+          "seat_number": 4,
+          "booking_time": "2023-11-26T11:40:00",
+          "status": "confirmed"
+        }
+      ]
+    },
+    {
+      "passenger_id": "PASS009",
+      "name": "James Anderson",
+      "email": "james.a@example.com",
+      "phone": "+1001122334",
+      "bookings": []
+    },
+    {
+      "passenger_id": "PASS010",
+      "name": "Patricia Taylor",
+      "email": "patricia.t@example.com",
+      "phone": "+1112233445",
+      "bookings": [
+        {
+          "booking_id": "B1012",
+          "train_id": "NIT5678",
+          "seat_number": 2,
+          "booking_time": "2023-11-27T12:15:00",
+          "status": "confirmed"
+        }
+      ]
+    }
+  ]
+}
