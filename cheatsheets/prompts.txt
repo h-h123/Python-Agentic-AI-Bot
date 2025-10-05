@@ -15,4 +15,26 @@ py new_agentic_app.py "Build a Streamlit-based stock trading simulator.Fetch sto
 
 py new_agentic_app.py "Build a Streamlit-based stock trading simulator.Fetch stock prices using Yahoo Finance (yfinance).Show candlestick charts with Plotly.Let user "buy" and "sell" virtual stocks with a balance of $10,000.Track portfolio performance in real-time.Requirements:Files: main.py, utils/stocks.py, utils/trading.py, utils/portfolio.py and requirements.txt included.Simple UI with tabs: Dashboard, Buy/Sell, Portfolio." "./my_projects/Stock-trading-app-streamlit2"
 
-py new_agentic_app.py "Create Python code application that simulates a railway reservation system with seat booking and cancellation." "./my_projects/rail-reservation-app"
+py multi-python-bot.py "Create Python code application that simulates a railway reservation system with seat booking and cancellation." "./my_projects/rail-reservation-app2"
+
+py multi-python-bot.py "Create Python code application that simulates a railway reservation system with seat booking and cancellation." "./my_projects/rail-reservation-app3"
+
+for rail 3 it wrote but in .py file there are comments ..
+for rail 4 failed
+
+py working-check-this-multi-python-bot.py "Create Python code application that simulates a railway reservation system with seat booking and cancellation." "./my_projects/rail-reservation-app5"
+
+for 5 it worked but markdown error  and  ''' 
+for 6  all worked  ...but folder structure was simple  ...
+for 7 all wokred chose 3rd option  ....working but no folder structure.
+
+
+py old-check.py "Create Python code application that simulates a railway reservation system with seat booking and cancellation." "./my_projects/rail-reservation-app8"
+for 8  check.py not working at all 
+
+py json-updated-working-check-this-multi-python-bot.py "Create Python code application that simulates a railway reservation system with seat booking and cancellation." "./my_projects/rail-reservation-app9"
+ for 9 code written for each file in each folder but not able to run/execute ...
+
+py check.py "Create Python code application that simulates a railway reservation system with seat booking and cancellation." "./my_projects/rail-reservation-app10"
+for 10 code written but src error again ...like 9....
+seems prblm with src only tried running manually got ModuleNotFoundError: No module named 'src'
