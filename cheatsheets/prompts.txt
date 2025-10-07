@@ -38,3 +38,11 @@ py json-updated-working-check-this-multi-python-bot.py "Create Python code appli
 py check.py "Create Python code application that simulates a railway reservation system with seat booking and cancellation." "./my_projects/rail-reservation-app10"
 for 10 code written but src error again ...like 9....
 seems prblm with src only tried running manually got ModuleNotFoundError: No module named 'src'
+
+
+py check.py "Create Python code application that simulates a railway reservation system with seat booking and cancellation." "./my_projects/rail-reservation-app11"
+for 11 code written but llm missed 1 file which caused runtime error (seat.py) (No SRC error it is fixed)
+
+
+py check.py "Create a Flask e-commerce project with products, carts, users, and orders folders, plus templates and static." "./my_projects/E-commerce"
+working but failing to import packages which are not installed by pip
