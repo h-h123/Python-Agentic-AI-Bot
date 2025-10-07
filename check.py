@@ -1,5 +1,5 @@
 # multi-python-bot.py
-# Agentic Python Project Generator - JSON-based Folder Structure (Option 1)
+# Agentic Python Project Generator - JSON-based Folder Structure (with src-safe imports)
 
 from mistralai import Mistral
 from mistralai.models import sdkerror
@@ -9,7 +9,6 @@ import os, sys, json, argparse, subprocess, time, importlib
 API_KEY = "CQx1GgPlnyr8IqqwbQmCFzFJH0dTj31k"
 MODEL = "mistral-medium"
 client = Mistral(api_key=API_KEY)
-
 
 # ---------------- HELPERS ----------------
 def ask_model_for_json_structure(task):
@@ -44,7 +43,6 @@ def ask_model_for_json_structure(task):
     - Include at least one main entry file (e.g., main.py or app.py).
     - Keep folder depth realistic (max 3 levels).
     """
-
     try:
         resp = client.chat.complete(model=MODEL, messages=[{"role": "user", "content": prompt}])
         content = resp.choices[0].message.content.strip()
@@ -71,7 +69,6 @@ def ask_model_for_file(task, file_path, existing_files):
     - No explanations, only valid code.
     - No markdown fences (```).
     """
-
     try:
         resp = client.chat.complete(model=MODEL, messages=[{"role": "user", "content": prompt}])
         return resp.choices[0].message.content.strip()
@@ -94,6 +91,16 @@ def save_file(project_root, rel_path, code):
     """Create folder hierarchy and save code."""
     full_path = os.path.join(project_root, rel_path)
     os.makedirs(os.path.dirname(full_path), exist_ok=True)
+
+    # ✅ Option B — inject sys.path fix into main/app files
+    if os.path.basename(rel_path) in ("main.py", "app.py"):
+        inject = (
+            "import sys, os\n"
+            "sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))\n\n"
+        )
+        if inject not in code:
+            code = inject + code
+
     with open(full_path, "w", encoding="utf-8") as f:
         f.write(code)
     print(f"✅ Saved: {rel_path}")
@@ -115,7 +122,6 @@ def build_structure_from_json(project_root, structure_dict):
             created_files.append(name)
     return created_files
 
-
 # ---------------- SAFE IMPORT LOGIC ----------------
 def safe_import_or_install(project_root, entry_file):
     """
@@ -123,6 +129,10 @@ def safe_import_or_install(project_root, entry_file):
     - If missing module is local (exists inside project_root), add to sys.path.
     - If external, install via pip once.
     """
+    # ✅ Option A — ensure project_root on sys.path before running anything
+    if project_root not in sys.path:
+        sys.path.insert(0, project_root)
+
     result = subprocess.run([sys.executable, entry_file], capture_output=True, text=True)
     out, err = result.stdout.strip(), result.stderr.strip()
 
@@ -130,7 +140,7 @@ def safe_import_or_install(project_root, entry_file):
         missing_pkg = err.split("'")[1]
         local_path = os.path.join(project_root, missing_pkg)
         if os.path.isdir(local_path):
-            print(f"🔹 Detected local module '{missing_pkg}', adding to sys.path.")
+            print(f"🔹 Detected local module '{missing_pkg}', adding to sys.path dynamically.")
             sys.path.insert(0, project_root)
             result = subprocess.run([sys.executable, entry_file], capture_output=True, text=True)
             out, err = result.stdout.strip(), result.stderr.strip()
@@ -149,12 +159,11 @@ def run_entry_file(entry_file):
     out, err = safe_import_or_install(project_root, entry_file)
     return out, err
 
-
 # ---------------- CORE LOGIC ----------------
 def create_project(task, project_root):
     os.makedirs(project_root, exist_ok=True)
 
-    # Step 1: Ask LLM for JSON-based structure
+    # Step 1 — Ask LLM for JSON-based structure
     structure_json = ask_model_for_json_structure(task)
     if not structure_json or "structure" not in structure_json:
         print("❌ Could not get valid JSON structure. Exiting.")
@@ -166,11 +175,10 @@ def create_project(task, project_root):
     print(f"\n📁 Generating project: {project_name}")
     print(json.dumps(structure, indent=2))
 
-    # Step 2: Build folder hierarchy & empty files
-    os.makedirs(project_root, exist_ok=True)
+    # Step 2 — Build folder hierarchy & empty files
     created_files = build_structure_from_json(project_root, structure)
 
-    # Step 3: Fill each file with code
+    # Step 3 — Fill each file with code
     existing_files = {}
     for file_path in created_files:
         if not file_path.endswith((".py", ".json", ".ini")):
@@ -189,7 +197,7 @@ def create_project(task, project_root):
         else:
             print(f"❌ Failed to generate code for {file_path}")
 
-    # Step 4: Run main/entry file
+    # Step 4 — Run main/entry file
     entry_file = None
     for f in existing_files:
         if f.endswith("main.py") or f.endswith("app.py"):
@@ -207,8 +215,7 @@ def create_project(task, project_root):
         print("⚠️ No entry file found.")
 
     print("\n🎉 Project generation complete.")
-
-
+    
 # ---------------- RUN ----------------
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
