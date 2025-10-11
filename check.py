@@ -1,5 +1,5 @@
 # multi-python-bot.py
-# Agentic Python Project Generator - JSON-based Folder Structure (with src-safe imports)
+# Agentic Python Project Generator - JSON-based Folder Structure (with src-safe imports + dependencies)
 
 from mistralai import Mistral
 from mistralai.models import sdkerror
@@ -12,13 +12,13 @@ client = Mistral(api_key=API_KEY)
 
 # ---------------- HELPERS ----------------
 def ask_model_for_json_structure(task):
-    """Ask LLM to return ONE project structure in JSON form."""
+    """Ask LLM to return ONE project structure in JSON form including dependencies."""
     prompt = f"""
     You are an expert Python project designer.
 
     Task: {task}
 
-    Respond **only** with a valid JSON object describing the folder structure,
+    Respond **only** with a valid JSON object describing the folder structure and required dependencies,
     not markdown text or explanations.
 
     Example format:
@@ -34,25 +34,29 @@ def ask_model_for_json_structure(task):
                 }}
             }},
             "README.md": "# Sample Project"
-        }}
+        }},
+        "dependencies": ["flask", "sqlalchemy"]
     }}
 
     Important:
     - Use only valid JSON syntax.
     - Every file must end with .py, .md, .json, or .ini.
-    - Include at least one main entry file (e.g., main.py or app.py).
+    - Include at least one main entry file (main.py or app.py).
     - Keep folder depth realistic (max 3 levels).
     """
-    try:
-        resp = client.chat.complete(model=MODEL, messages=[{"role": "user", "content": prompt}])
-        content = resp.choices[0].message.content.strip()
-        json_str = content[content.find("{"):content.rfind("}") + 1]
-        return json.loads(json_str)
-    except Exception as e:
-        print(f"⚠️ Failed to parse JSON structure: {e}")
-        print("Raw response:", resp.choices[0].message.content if 'resp' in locals() else "")
-        return None
-
+    for attempt in range(3):
+        try:
+            resp = client.chat.complete(model=MODEL, messages=[{"role": "user", "content": prompt}])
+            content = resp.choices[0].message.content.strip()
+            print("📝 Raw model output:\n", content)
+            json_str = content[content.find("{"):content.rfind("}") + 1]
+            structure_json = json.loads(json_str)
+            return structure_json
+        except Exception as e:
+            print(f"⚠️ Attempt {attempt+1}: Failed to parse JSON structure: {e}")
+            time.sleep(2)
+    print("❌ Could not get valid JSON structure after 3 attempts. Exiting.")
+    return None
 
 def ask_model_for_file(task, file_path, existing_files):
     """Ask LLM to generate code for a single file."""
@@ -69,13 +73,16 @@ def ask_model_for_file(task, file_path, existing_files):
     - No explanations, only valid code.
     - No markdown fences (```).
     """
-    try:
-        resp = client.chat.complete(model=MODEL, messages=[{"role": "user", "content": prompt}])
-        return resp.choices[0].message.content.strip()
-    except sdkerror.SDKError as e:
-        print(f"⚠️ SDK Error: {e}")
-        return None
-
+    for attempt in range(3):
+        try:
+            resp = client.chat.complete(model=MODEL, messages=[{"role": "user", "content": prompt}])
+            code = resp.choices[0].message.content.strip()
+            if code:
+                return code
+        except sdkerror.SDKError as e:
+            print(f"⚠️ Attempt {attempt+1} SDK Error: {e}")
+        time.sleep(1)
+    return None
 
 def clean_code(code):
     """Remove markdown fences or unwanted text."""
@@ -86,13 +93,11 @@ def clean_code(code):
         lines.append(line)
     return "\n".join(lines).strip()
 
-
 def save_file(project_root, rel_path, code):
-    """Create folder hierarchy and save code."""
+    """Create folder hierarchy and save code, inject sys.path fix into main/app files."""
     full_path = os.path.join(project_root, rel_path)
     os.makedirs(os.path.dirname(full_path), exist_ok=True)
 
-    # ✅ Option B — inject sys.path fix into main/app files
     if os.path.basename(rel_path) in ("main.py", "app.py"):
         inject = (
             "import sys, os\n"
@@ -104,7 +109,6 @@ def save_file(project_root, rel_path, code):
     with open(full_path, "w", encoding="utf-8") as f:
         f.write(code)
     print(f"✅ Saved: {rel_path}")
-
 
 def build_structure_from_json(project_root, structure_dict):
     """Recursively create all folders/files from JSON description."""
@@ -122,36 +126,60 @@ def build_structure_from_json(project_root, structure_dict):
             created_files.append(name)
     return created_files
 
+# ---------------- DEPENDENCY LOGIC ----------------
+def install_dependencies(project_root, dependencies):
+    """Save requirements.txt and attempt installation with 3 retries per package."""
+    if not dependencies:
+        return
+    req_file = os.path.join(project_root, "requirements.txt")
+    failed_file = os.path.join(project_root, "failed_requirements.txt")
+
+    with open(req_file, "w", encoding="utf-8") as f:
+        f.write("\n".join(dependencies))
+    print(f"✅ Saved requirements.txt with {len(dependencies)} packages")
+
+    failed_packages = []
+    for dep in dependencies:
+        for attempt in range(3):
+            print(f"📦 Installing {dep} (attempt {attempt+1}) ...")
+            result = subprocess.run([sys.executable, "-m", "pip", "install", dep], capture_output=True, text=True)
+            if result.returncode == 0:
+                print(f"✅ Installed {dep}")
+                break
+            else:
+                print(f"⚠️ Failed to install {dep}: {result.stderr.strip()}")
+                time.sleep(2)
+        else:
+            print(f"❌ Could not install {dep} after 3 attempts.")
+            failed_packages.append(dep)
+
+    if failed_packages:
+        with open(failed_file, "w", encoding="utf-8") as f:
+            f.write("\n".join(failed_packages))
+        print(f"⚠️ Some packages failed to install. See {failed_file}")
+
 # ---------------- SAFE IMPORT LOGIC ----------------
 def safe_import_or_install(project_root, entry_file):
-    """
-    Try to run and fix missing imports.
-    - If missing module is local (exists inside project_root), add to sys.path.
-    - If external, install via pip once.
-    """
-    # ✅ Option A — ensure project_root on sys.path before running anything
+    """Run entry file with safe import handling."""
     if project_root not in sys.path:
         sys.path.insert(0, project_root)
 
-    result = subprocess.run([sys.executable, entry_file], capture_output=True, text=True)
-    out, err = result.stdout.strip(), result.stderr.strip()
-
-    if "ModuleNotFoundError" in err:
-        missing_pkg = err.split("'")[1]
-        local_path = os.path.join(project_root, missing_pkg)
-        if os.path.isdir(local_path):
-            print(f"🔹 Detected local module '{missing_pkg}', adding to sys.path dynamically.")
-            sys.path.insert(0, project_root)
-            result = subprocess.run([sys.executable, entry_file], capture_output=True, text=True)
-            out, err = result.stdout.strip(), result.stderr.strip()
-        else:
-            print(f"📦 Installing missing external package: {missing_pkg} ...")
-            subprocess.run([sys.executable, "-m", "pip", "install", missing_pkg])
-            result = subprocess.run([sys.executable, entry_file], capture_output=True, text=True)
-            out, err = result.stdout.strip(), result.stderr.strip()
-
+    for attempt in range(3):
+        result = subprocess.run([sys.executable, entry_file], capture_output=True, text=True)
+        out, err = result.stdout.strip(), result.stderr.strip()
+        if "ModuleNotFoundError" in err:
+            missing_pkg = err.split("'")[1]
+            local_path = os.path.join(project_root, missing_pkg)
+            if os.path.isdir(local_path):
+                print(f"🔹 Detected local module '{missing_pkg}', adding to sys.path dynamically.")
+                sys.path.insert(0, project_root)
+            else:
+                print(f"📦 Installing missing external package: {missing_pkg} ...")
+                subprocess.run([sys.executable, "-m", "pip", "install", missing_pkg])
+                time.sleep(1)
+                continue
+        break
     return out, err
-
 
 def run_entry_file(entry_file):
     """Run entry file with safe import handling."""
@@ -171,33 +199,32 @@ def create_project(task, project_root):
 
     project_name = structure_json.get("project_name", "generated_project")
     structure = structure_json["structure"]
+    dependencies = structure_json.get("dependencies", [])
 
     print(f"\n📁 Generating project: {project_name}")
     print(json.dumps(structure, indent=2))
 
-    # Step 2 — Build folder hierarchy & empty files
+    # Step 2 — Save & pre-install dependencies
+    install_dependencies(project_root, dependencies)
+
+    # Step 3 — Build folder hierarchy & empty files
     created_files = build_structure_from_json(project_root, structure)
 
-    # Step 3 — Fill each file with code
+    # Step 4 — Fill each file with code
     existing_files = {}
     for file_path in created_files:
         if not file_path.endswith((".py", ".json", ".ini")):
             continue
         print(f"\n📝 Generating code for: {file_path}")
-        for attempt in range(3):
-            code = ask_model_for_file(task, file_path, existing_files)
-            if code:
-                code = clean_code(code)
-                save_file(project_root, file_path, code)
-                existing_files[file_path] = code
-                break
-            else:
-                print(f"⚠️ Attempt {attempt + 1}: Empty output, retrying...")
-                time.sleep(1)
+        code = ask_model_for_file(task, file_path, existing_files)
+        if code:
+            code = clean_code(code)
+            save_file(project_root, file_path, code)
+            existing_files[file_path] = code
         else:
-            print(f"❌ Failed to generate code for {file_path}")
+            print(f"⚠️ Failed to generate code for {file_path}")
 
-    # Step 4 — Run main/entry file
+    # Step 5 — Run main/entry file
     entry_file = None
     for f in existing_files:
         if f.endswith("main.py") or f.endswith("app.py"):
@@ -215,7 +242,7 @@ def create_project(task, project_root):
         print("⚠️ No entry file found.")
 
     print("\n🎉 Project generation complete.")
-    
+
 # ---------------- RUN ----------------
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
