@@ -46,3 +46,10 @@ for 11 code written but llm missed 1 file which caused runtime error (seat.py) (
 
 py check.py "Create a Flask e-commerce project with products, carts, users, and orders folders, plus templates and static." "./my_projects/E-commerce"
 working but failing to import packages which are not installed by pip
+
+
+py check.py "Create a Flask e-commerce project with products, carts, users, and orders folders, plus templates and static." "./my_projects/E-commerce2"
+for 2 working but failing to import packages which are not installed by pip ...installed some but failed for more
+
+py check.py "Create a Flask e-commerce project with products, carts, users, and orders folders, plus templates and static." "./my_projects/E-commerce3"
+worked all ... but stuck ... need to check again
