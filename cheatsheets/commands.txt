@@ -1,4 +1,4 @@
-source "myenv/Scripts/activate"
+source "myenv/Scripts/activate" (bash)
 
 git reset
 
